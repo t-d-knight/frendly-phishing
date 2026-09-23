@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Free Coffee?</title>
+<style>
+  :root {
+    --bg: #0f1720; --card: #17212c; --ink: #e8eef4; --muted: #9fb0c0;
+    --accent: #f5b83d; --good: #4cc38a; --bad: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 24px 16px 48px;
+  }
+  main { max-width: 560px; margin: 0 auto; }
+  .cup { font-size: 64px; text-align: center; margin: 8px 0 0; }
+  h1 { font-size: 30px; line-height: 1.15; text-align: center; margin: 12px 0 6px; }
+  .sub { text-align: center; color: var(--muted); margin: 0 0 24px; }
+  .count {
+    background: var(--card); border-radius: 14px; padding: 16px; text-align: center; margin-bottom: 20px;
+  }
+  .count b { display: block; font-size: 44px; color: var(--accent); line-height: 1.1; }
+  .card { background: var(--card); border-radius: 14px; padding: 18px 18px 8px; margin-bottom: 16px; }
+  h2 { font-size: 19px; margin: 0 0 10px; }
+  ul { padding-left: 20px; margin: 0 0 10px; }
+  li { margin-bottom: 8px; }
+  .good strong { color: var(--good); } .bad { color: var(--bad); }
+  .reassure { border-left: 4px solid var(--good); }
+  .prize { border-left: 4px solid var(--accent); }
+  footer { color: var(--muted); font-size: 14px; text-align: center; margin-top: 24px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="cup">☕🎣</div>
+  <h1>Sorry, no free coffee.<br>But you did just get phished.</h1>
+  <p class="sub">(Well, you would have been, if we were the bad guys.)</p>
+
+  <div class="count" aria-live="polite">
+    <b id="n">…</b>
+    people have scanned this code so far
+  </div>
+
+  <div class="card reassure">
+    <h2>Don't worry, nothing happened</h2>
+    <p>This page is run by the <strong>Cyber Security team</strong> for Cyber Security Awareness Month. We didn't collect your name, your device, your location, or anything else. We only add one to the counter above.</p>
+  </div>
+
+  <div class="card">
+    <h2>So what could a real one have done?</h2>
+    <ul>
+      <li>Shown a fake staff login page to <span class="bad">steal your password</span></li>
+      <li>Asked you to "confirm your details" for the prize</li>
+      <li>Pushed an app or file to your phone</li>
+      <li>Set off an MFA prompt it wanted you to approve</li>
+    </ul>
+    <p>QR codes are just links you can't read. A sticker slapped over a real one looks exactly the same.</p>
+  </div>
+
+  <div class="card">
+    <h2>Before you scan, ask</h2>
+    <ul>
+      <li class="good"><strong>Who put this here?</strong> Official posters come from somewhere you can check.</li>
+      <li class="good"><strong>Is it too good to be true?</strong> Free stuff plus urgency is the oldest trick there is.</li>
+      <li class="good"><strong>Check the link preview</strong> your camera shows before you tap it.</li>
+      <li class="good"><strong>Never enter work passwords</strong> on a page you reached from a QR code.</li>
+      <li class="good"><strong>Not sure? Report it.</strong> You won't get in trouble, and we would much rather hear about it.</li>
+    </ul>
+  </div>
+
+  <div class="card prize">
+    <h2>Come and say hi 👋</h2>
+    <p>The Cyber team is in the <strong>main hospital atrium</strong> this month. Show us this screen and we'll swap you a lolly for the coffee you didn't get. Bring your questions: no question is too basic.</p>
+  </div>
+
+  <footer>Cyber Security Awareness Month · Cyber Security Team</footer>
+</main>
+<script>
+  (function () {
+    var el = document.getElementById("n");
+    fetch("/api/scan", { method: "POST", credentials: "same-origin" })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { el.textContent = Number(d.total).toLocaleString("en-AU"); })
+      .catch(function () { el.parentNode.style.display = "none"; });
+  })();
+</script>
+</body>
+</html>

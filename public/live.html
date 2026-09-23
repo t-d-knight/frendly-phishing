@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Scan Counter</title>
+<style>
+  :root { --bg: #0b1118; --ink: #e8eef4; --muted: #8a9bab; --accent: #f5b83d; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink); overflow: hidden;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 4vh 5vw;
+  }
+  .kicker { font-size: 3vw; color: var(--muted); margin: 0; }
+  #total {
+    font-size: 28vw; font-weight: 800; line-height: 1; color: var(--accent);
+    font-variant-numeric: tabular-nums; transition: transform .25s ease; margin: 1vh 0;
+  }
+  #total.bump { transform: scale(1.08); }
+  .tag { font-size: 4vw; margin: 0; }
+  .tag small { display: block; font-size: 2vw; color: var(--muted); margin-top: 2vh; }
+  #last { font-size: 1.8vw; color: var(--muted); margin-top: 3vh; }
+  #stale { position: fixed; bottom: 1vw; right: 1.5vw; font-size: 1.2vw; color: #ff6b6b; display: none; }
+  @media (max-aspect-ratio: 1/1) {
+    #total { font-size: 45vw; } .kicker, .tag { font-size: 6vw; } .tag small, #last { font-size: 4vw; }
+  }
+</style>
+</head>
+<body>
+  <p class="kicker">Staff who scanned a random "free coffee" QR code</p>
+  <div id="total">0</div>
+  <p class="tag">and got phished. (By us. Nicely.)
+    <small>Nothing about you is collected: we just count. Come and ask us how it works.</small></p>
+  <div id="last"></div>
+  <div id="stale">⚠ can't reach counter, retrying…</div>
+<script>
+  var POLL_MS = 3000;
+  var shown = 0, totalEl = document.getElementById("total");
+
+  function animateTo(target) {
+    if (target === shown) return;
+    var start = shown, t0 = performance.now(), dur = 800;
+    totalEl.classList.add("bump");
+    setTimeout(function () { totalEl.classList.remove("bump"); }, 260);
+    (function step(t) {
+      var p = Math.min(1, (t - t0) / dur);
+      totalEl.textContent = Math.round(start + (target - start) * p).toLocaleString("en-AU");
+      if (p < 1) requestAnimationFrame(step);
+    })(t0);
+    shown = target;
+  }
+
+  function ago(sqlTime) {
+    if (!sqlTime) return "";
+    var s = Math.max(0, (Date.now() - Date.parse(sqlTime.replace(" ", "T") + "Z")) / 1000);
+    if (s < 60) return "Last scan: just now";
+    if (s < 3600) return "Last scan: " + Math.floor(s / 60) + " min ago";
+    return "Last scan: " + Math.floor(s / 3600) + " h ago";
+  }
+
+  function poll() {
+    fetch("/api/count", { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (d) {
+        document.getElementById("stale").style.display = "none";
+        animateTo(d.total);
+        document.getElementById("last").textContent = ago(d.last_at);
+      })
+      .catch(function () { document.getElementById("stale").style.display = "block"; })
+      .finally(function () { setTimeout(poll, POLL_MS); });
+  }
+  poll();
+</script>
+</body>
+</html>
