@@ -15,51 +15,48 @@ on purpose, because at small sites a per-site count could point to individual st
 twice for 30 days. The count only goes up when the page's JavaScript runs, so Teams/Outlook link
 previews and scanners that only fetch the URL don't inflate it.
 
-## Deploy (about 10 minutes)
+## Deploy
 
-You need a Cloudflare account and Node 18+.
+This is a Cloudflare **Worker with static assets**: `public/` is the website, `src/index.js` is the
+two-endpoint API, and `wrangler.toml` wires in the D1 database. You need a Cloudflare account and Node 18+.
+
+### One-time setup (your own terminal)
 
 ```bash
 npm install
 npx wrangler login
-
-# 1. Create the database. Copy the database_id it prints into wrangler.toml
-npx wrangler d1 create coffee-qr
-
-# 2. Create the table
+npx wrangler d1 create coffee-qr          # copy the database_id it prints into wrangler.toml
 npx wrangler d1 execute coffee-qr --remote --file=schema.sql
-
-# 3. Create the Pages project and deploy (functions/ is picked up automatically)
-npx wrangler pages project create coffee-qr --production-branch main
-npx wrangler pages deploy
 ```
 
-Wrangler reads the D1 binding from `wrangler.toml`. If the counter shows nothing after deploying,
-check **Pages → coffee-qr → Settings → Bindings** and confirm that `DB` points at the `coffee-qr` database.
+### Option A: deploy from Git (rebuilds on every push)
 
-You'll get `https://coffee-qr.pages.dev` (or pick a different project name). You can also
-attach a custom domain under **Custom domains**. A believable-but-harmless domain makes the lesson
-land harder, but **don't** use anything that imitates the hospital's real domain or branding.
-
-## Or: deploy from Git (Cloudflare builds on every push)
-
-Do steps 1 and 2 above once from your own terminal, so the database and table exist. Then, in
-**Workers & Pages → Create → Pages → Connect to Git**:
+**Workers & Pages → Create → Import a repository**, then:
 
 | Setting | Value |
 |---|---|
-| Framework preset | None |
-| Build command | *(leave empty, or `exit 0`)* |
-| Build output directory | `public` |
+| Build command | *(leave empty)* |
+| Deploy command | `npx wrangler deploy` (the default) |
 
-Then go to **Settings → Bindings → Add → D1 database**, set the variable name to `DB`, and pick `coffee-qr`.
-**Don't** put the setup commands above in the build command: they're one-time and need your login.
+The Worker name in the dashboard must match `name` in `wrangler.toml`. The D1 binding comes from
+`wrangler.toml`, so there's nothing to set in the dashboard. **Don't** put the one-time setup commands
+in the build or deploy command, because they need your login.
+
+### Option B: deploy from your terminal
+
+```bash
+npx wrangler deploy
+```
+
+You'll get `https://frendly-phishing.<your-subdomain>.workers.dev`. To add your own domain, go to
+**Settings → Domains & Routes → Add → Custom domain** (for example `qr.demo-domain.xyz`). If the
+domain's DNS is on Cloudflare, it sets up DNS and the certificate for you.
 
 ## Make the QR codes
 
 ```bash
 pip install "qrcode[pil]"
-python make_qr.py https://coffee-qr.pages.dev
+python make_qr.py https://qr.demo-domain.xyz
 ```
 
 This gives you `qr.png`. The same code goes on every poster at every site.
@@ -68,8 +65,8 @@ This gives you `qr.png`. The same code goes on every poster at every site.
 
 ```bash
 npx wrangler d1 execute coffee-qr --local --file=schema.sql
-npx wrangler pages dev
-# open http://localhost:8788/ and http://localhost:8788/live
+npx wrangler dev
+# open http://localhost:8787/ and http://localhost:8787/live
 ```
 
 ## Handy commands

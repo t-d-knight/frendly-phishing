@@ -1,7 +1,11 @@
-# "name" should match the Pages project name in the Cloudflare dashboard.
+# "name" must match the Worker name in the Cloudflare dashboard.
 name = "frendly-phishing"
-pages_build_output_dir = "./public"
+main = "src/index.js"
 compatibility_date = "2025-01-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
 
 [[d1_databases]]
 binding = "DB"
