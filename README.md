@@ -41,6 +41,20 @@ You'll get `https://coffee-qr.pages.dev` (or pick a different project name). You
 attach a custom domain under **Custom domains**. A believable-but-harmless domain makes the lesson
 land harder, but **don't** use anything that imitates the hospital's real domain or branding.
 
+## Or: deploy from Git (Cloudflare builds on every push)
+
+Do steps 1 and 2 above once from your own terminal, so the database and table exist. Then, in
+**Workers & Pages → Create → Pages → Connect to Git**:
+
+| Setting | Value |
+|---|---|
+| Framework preset | None |
+| Build command | *(leave empty, or `exit 0`)* |
+| Build output directory | `public` |
+
+Then go to **Settings → Bindings → Add → D1 database**, set the variable name to `DB`, and pick `coffee-qr`.
+**Don't** put the setup commands above in the build command: they're one-time and need your login.
+
 ## Make the QR codes
 
 ```bash

@@ -1,4 +1,5 @@
-name = 'frendly-phishing'
+# "name" should match the Pages project name in the Cloudflare dashboard.
+name = "frendly-phishing"
 pages_build_output_dir = "./public"
 compatibility_date = "2025-01-01"
 
